@@ -78,8 +78,6 @@ distBetween (x1, y1) (x2, y2) = sqrt ((x1 - x2)**2 + (y1 - y2)**2) -- Pythagorea
 Prove the following property:
 area (Rectangle s1 s2)
     => area (Polygon [(0,0), (s1,0), (s1,s2), (0,s2)])
-
-Skipped
 -}
 
 {- 2.4
@@ -131,17 +129,3 @@ trapesoidAreas (Polygon vs) = sum $ trapesoids (vs ++ [head vs])
         trapesoids (_:[]) = []
         trapesoids ((x1, y1):(x2, y2):vs')
             = (x2 - x1) * (y1 - y2) * 0.5 : trapesoids ((x2, y2):vs')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
