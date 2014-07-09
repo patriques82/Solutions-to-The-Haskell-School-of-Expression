@@ -1,6 +1,6 @@
-module Shape where
+module Ch2 where
 
-import Ch1 (circleArea) -- import only circleArea for property testing later
+-- Book
 
 data Shape = Rectangle Side Side
            | Ellipse Radius Radius
@@ -50,15 +50,17 @@ regularPolygon n s = Polygon $ vertices n
                 x = cos (angle * fromIntegral nr) * radius
                 y = sin (angle * fromIntegral nr) * radius
 
+-- Book
 
 area :: Shape -> Float
 area (Rectangle s1 s2)  = s1 * s2
 area (RtTriangle s1 s2) = s1 * s2 / 2
 area (Ellipse r1 r2)    = pi * r1 * r2
 area (Polygon (v1:vs))  = polyArea vs
-    where polyArea :: [Vertex] -> Float
-          polyArea (v2:v3:vs') = triArea v1 v2 v3 + polyArea (v3:vs')
-          polyArea _           = 0.0
+    where
+        polyArea :: [Vertex] -> Float
+        polyArea (v2:v3:vs') = triArea v1 v2 v3 + polyArea (v3:vs')
+        polyArea _           = 0.0
 area _                  = 0.0
 
 triArea :: Vertex -> Vertex -> Vertex -> Float
@@ -90,34 +92,56 @@ Property of a convex polygon:
 A vertex V of a polygon is a reflex vertex if its internal angle is strictly greater than pi.
 Otherwise the vertex is called convex.
 
-other (but not used) properties:
-* Every line segment between two vertices remains inside or on the boundary of the polygon.
-* The polygon is entirely contained in a closed half-plane defined by each of its edges.
-* For each edge, the vertices not contained in the edge are on the same side of the line that the edge defines.
-* The angle at each vertex contains all other vertices in its interior (except the three vertices defining the angle).
+Idea for algorithm: http://debian.fmi.uni-sofia.bg/~sergei/cgsr/docs/clockwise.htm
 -}
 
 convex :: Shape -> Bool
-convex (Polygon (v1:v2:vs))   = all (< pi) (angles (v1:v2:vs))          -- makes us of filter function
-    where angles (v2:v3:v4:vs') = angle v2 v3 v4 : angles (v3:v4:vs')
-          angles (v5:v6:[])     = [angle v5 v6 v1, angle v6 v1 v2]      -- wrap the last vertices together with the first
-convex (Rectangle a b)        = True
-convex (RtTriangle a b)       = True
-convex (Ellipse r1 r2)        = True
+convex (Polygon vs@(v1:v2:vs'))   = nonCoincident vs && all (> 0) (crossProducts (vs ++ [v1, v2]))    -- makes use of filter function
+convex (Rectangle a b)            = True
+convex (RtTriangle a b)           = True
+convex (Ellipse r1 r2)            = True
 
-angle :: Vertex -> Vertex -> Vertex -> Float
-angle v1 v2 v3 = let ab = v1 `minus` v2
-                     bc = v3 `minus` v2
-                     dot = ab `dotProduct` bc
-                     cosine = dot / (distBetween v1 v2 * distBetween v2 v3)
-                 in acos cosine
-                 -- in rad2deg . acos $ cosine
+-- Checks that 2 vertices does not coincide
+nonCoincident :: [Vertex] -> Bool
+nonCoincident [] = True
+nonCoincident vs
+    = let top  = head vs
+          rest = tail vs
+      in all (\(x,y) -> x /= fst top && y /= snd top) rest && nonCoincident rest
 
-minus :: Vertex -> Vertex -> Vertex
-minus (x1, y1) (x2, y2) = ((x2 - x1), (y2 - y1))
+-- Checks that all angles are counterclockwise (positive crossproduct between all adjacent edges)
+crossProducts :: [Vertex] -> [Float]
+crossProducts (_:_:[]) = []
+crossProducts ((x1, y1):(x2, y2):(x3, y3):vs)
+    = let cp            = (x2 - x1) * (y3 - y2) - (y2 - y1) * (x3 - x2)
+      in cp:crossProducts ((x2, y2):(x3, y3):vs)
 
-dotProduct :: Vertex -> Vertex -> Float
-dotProduct (x1, y1) (x2, y2) = x1 * x2 + y1 * y2
+{- 2.5
+Write a Haskell function to compute polygonal areas with help of the trapesoid interpretation.
 
--- for testing purposes (taken from Real World Haskell)
-rad2deg x = 360 * x / (2 * pi)
+Idea for algorithm: http://www.geocomputation.org/1999/076/gc_076.htm
+still figuring it out...
+-}
+
+-- calculates all trapesoids in the polygon measured against the x-axis
+trapesoidAreas :: Shape -> Float
+trapesoidAreas (Polygon vs) = sum $ trapesoids (vs ++ [head vs])
+    where
+        trapesoids :: [Vertex] -> [Float]
+        trapesoids (_:[]) = []
+        trapesoids ((x1, y1):(x2, y2):vs')
+            = (x2 - x1) * (y1 - y2) * 0.5 : trapesoids ((x2, y2):vs')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
