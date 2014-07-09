@@ -1,4 +1,7 @@
-module Ch2 where
+module Shape (Shape (...)
+             , Radius, Side, Vertex
+             , square, circle, distBetween, area
+             ) where
 
 -- Book
 
@@ -99,7 +102,7 @@ convex (Rectangle a b)            = True
 convex (RtTriangle a b)           = True
 convex (Ellipse r1 r2)            = True
 
--- Checks that 2 vertices does not coincide
+-- Checks that non of the vertices does not coincide
 nonCoincident :: [Vertex] -> Bool
 nonCoincident [] = True
 nonCoincident vs
