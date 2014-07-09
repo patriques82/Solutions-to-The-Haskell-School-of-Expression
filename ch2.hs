@@ -15,7 +15,7 @@ square s = Rectangle s s
 circle r = Ellipse r r
 
 {- 2.1
-Define functions "rectangle" and "rtTriangle" in terns of
+Define functions "rectangle" and "rtTriangle" in terms of
 Polygon.
 -}
 
@@ -38,11 +38,19 @@ regularPolygon :: Int -> Side -> Shape
 regularPolygon n s = Polygon $ vertices n
     where
         angle  = (pi * 2) / fromIntegral n
-        radius = sin angle * (s / 2)
+        radius = (1 / sin (angle / 2)) * (s / 2)
         vertices nr | nr > 0    = (x, y) : vertices (nr - 1) -- recursive definition
                     | otherwise = []
             where
                 -- increment angle with nr for each new vertex
                 x = cos (angle * fromIntegral nr) * radius
                 y = sin (angle * fromIntegral nr) * radius
+
+regularPolygon' :: Int -> Side -> Shape
+regularPolygon' n s
+    = let angleinc = pi * 2 / fromIntegral n
+          radius = s * sin ((pi - angleinc) / 2) / sin angleinc
+          regularVerts 0 _     = []
+          regularVerts n angle = (radius * cos angle, radius * sin angle) : regularVerts (n-1) (angle + angleinc)
+      in Polygon (regularVerts n 0)
 
