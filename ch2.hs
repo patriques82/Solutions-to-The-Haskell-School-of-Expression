@@ -1,5 +1,7 @@
 module Shape where
 
+import Ch1 (circleArea) -- import only circleArea for property testing later
+
 data Shape = Rectangle Side Side
            | Ellipse Radius Radius
            | RtTriangle Side Side
@@ -13,6 +15,7 @@ type Vertex = (Float, Float)
 square s = Rectangle s s
 
 circle r = Ellipse r r
+
 
 {- 2.1
 Define functions "rectangle" and "rtTriangle" in terms of
@@ -37,20 +40,84 @@ such as "sin :: Float -> Float", "cos :: Float -> Float", and "tan :: Float -> F
 regularPolygon :: Int -> Side -> Shape
 regularPolygon n s = Polygon $ vertices n
     where
-        angle  = (pi * 2) / fromIntegral n
-        radius = (1 / sin (angle / 2)) * (s / 2)
-        vertices nr | nr > 0    = (x, y) : vertices (nr - 1) -- recursive definition
-                    | otherwise = []
+        angle  = (pi * 2) / fromIntegral n     -- angle between each vertex
+        radius = (0.5 * s) / sin (0.5 * angle) -- radius of the surrounding circle
+        vertices :: Int -> [Vertex]            -- recursive helper function
+        vertices 0  = []
+        vertices nr = (x, y) : vertices (nr - 1)
             where
                 -- increment angle with nr for each new vertex
                 x = cos (angle * fromIntegral nr) * radius
                 y = sin (angle * fromIntegral nr) * radius
 
-regularPolygon' :: Int -> Side -> Shape
-regularPolygon' n s
-    = let angleinc = pi * 2 / fromIntegral n
-          radius = s * sin ((pi - angleinc) / 2) / sin angleinc
-          regularVerts 0 _     = []
-          regularVerts n angle = (radius * cos angle, radius * sin angle) : regularVerts (n-1) (angle + angleinc)
-      in Polygon (regularVerts n 0)
 
+area :: Shape -> Float
+area (Rectangle s1 s2)  = s1 * s2
+area (RtTriangle s1 s2) = s1 * s2 / 2
+area (Ellipse r1 r2)    = pi * r1 * r2
+area (Polygon (v1:vs))  = polyArea vs
+    where polyArea :: [Vertex] -> Float
+          polyArea (v2:v3:vs') = triArea v1 v2 v3 + polyArea (v3:vs')
+          polyArea _           = 0.0
+area _                  = 0.0
+
+triArea :: Vertex -> Vertex -> Vertex -> Float
+triArea v1 v2 v3
+    = let a = distBetween v1 v2
+          b = distBetween v2 v3
+          c = distBetween v3 v1
+          s = 0.5 * (a + b + c)
+      in sqrt (s * (s - a) * (s - b) * (s - c)) -- Herons formula
+
+distBetween :: Vertex -> Vertex -> Float
+distBetween (x1, y1) (x2, y2) = sqrt ((x1 - x2)**2 + (y1 - y2)**2) -- Pythagorean theorem
+
+{- 2.3
+Prove the following property:
+area (Rectangle s1 s2)
+    => area (Polygon [(0,0), (s1,0), (s1,s2), (0,s2)])
+
+Skipped
+-}
+
+{- 2.4
+Define a function "convex :: Shape -> Bool" that determines
+whether or not its agument is a convex shape (athough we are mainly
+intereste in the convexity of polygons, you might as well define it
+for each kind of shape.
+
+Property of a convex polygon:
+A vertex V of a polygon is a reflex vertex if its internal angle is strictly greater than pi.
+Otherwise the vertex is called convex.
+
+other (but not used) properties:
+* Every line segment between two vertices remains inside or on the boundary of the polygon.
+* The polygon is entirely contained in a closed half-plane defined by each of its edges.
+* For each edge, the vertices not contained in the edge are on the same side of the line that the edge defines.
+* The angle at each vertex contains all other vertices in its interior (except the three vertices defining the angle).
+-}
+
+convex :: Shape -> Bool
+convex (Polygon (v1:v2:vs))   = all (< pi) (angles (v1:v2:vs))          -- makes us of filter function
+    where angles (v2:v3:v4:vs') = angle v2 v3 v4 : angles (v3:v4:vs')
+          angles (v5:v6:[])     = [angle v5 v6 v1, angle v6 v1 v2]      -- wrap the last vertices together with the first
+convex (Rectangle a b)        = True
+convex (RtTriangle a b)       = True
+convex (Ellipse r1 r2)        = True
+
+angle :: Vertex -> Vertex -> Vertex -> Float
+angle v1 v2 v3 = let ab = v1 `minus` v2
+                     bc = v3 `minus` v2
+                     dot = ab `dotProduct` bc
+                     cosine = dot / (distBetween v1 v2 * distBetween v2 v3)
+                 in acos cosine
+                 -- in rad2deg . acos $ cosine
+
+minus :: Vertex -> Vertex -> Vertex
+minus (x1, y1) (x2, y2) = ((x2 - x1), (y2 - y1))
+
+dotProduct :: Vertex -> Vertex -> Float
+dotProduct (x1, y1) (x2, y2) = x1 * x2 + y1 * y2
+
+-- for testing purposes (taken from Real World Haskell)
+rad2deg x = 360 * x / (2 * pi)

@@ -45,5 +45,25 @@ simple 'a' 'b' 'c' :: error
 (simple 1 2 3, simple) :: Num t => (t, (t -> t -> t -> t))
 -}
 
+circleArea :: Float -> Float
+circleArea r = pi * (r ** 2) -- power of 2
+
+totalArea :: Float -> Float -> Float -> Float
+totalArea r1 r2 r3 = circleArea r1 + circleArea r2 + circleArea r3
+
+listSum :: [Float] -> Float
+listSum []     = 0
+listSum (x:xs) = x + listSum xs
+
+totalArea' :: Float -> Float -> Float -> Float
+totalArea' r1 r2 r3 = listSum [circleArea r1, circleArea r2, circleArea r3]
+
+
+
+
+
+
+
+
 
 
