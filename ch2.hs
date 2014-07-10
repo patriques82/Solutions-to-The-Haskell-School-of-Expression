@@ -97,12 +97,13 @@ Idea for algorithm: http://debian.fmi.uni-sofia.bg/~sergei/cgsr/docs/clockwise.h
 -}
 
 convex :: Shape -> Bool
+-- Checks: noncoincident vertices and that all crossproducts of 3 neighbouring vertices are positive
 convex (Polygon vs@(v1:v2:vs'))   = nonCoincident vs && all (> 0) (crossProducts (vs ++ [v1, v2]))    -- makes use of filter function
 convex (Rectangle a b)            = True
 convex (RtTriangle a b)           = True
 convex (Ellipse r1 r2)            = True
 
--- Checks that non of the vertices does not coincide
+-- Checks that non of the vertices does coincide
 nonCoincident :: [Vertex] -> Bool
 nonCoincident [] = True
 nonCoincident vs
@@ -110,11 +111,11 @@ nonCoincident vs
           rest = tail vs
       in all (\(x,y) -> x /= fst top && y /= snd top) rest && nonCoincident rest
 
--- Checks that all angles are counterclockwise (positive crossproduct between all adjacent edges)
+-- Checks that all angles are moving counterclockwise (positive crossproduct between all adjacent edges)
 crossProducts :: [Vertex] -> [Float]
 crossProducts (_:_:[]) = []
 crossProducts ((x1, y1):(x2, y2):(x3, y3):vs)
-    = let cp            = (x2 - x1) * (y3 - y2) - (y2 - y1) * (x3 - x2)
+    = let cp = (x2 - x1) * (y3 - y2) - (y2 - y1) * (x3 - x2)
       in cp:crossProducts ((x2, y2):(x3, y3):vs)
 
 {- 2.5
