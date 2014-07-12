@@ -81,6 +81,8 @@ distBetween (x1, y1) (x2, y2) = sqrt ((x1 - x2)**2 + (y1 - y2)**2) -- Pythagorea
 Prove the following property:
 area (Rectangle s1 s2)
     => area (Polygon [(0,0), (s1,0), (s1,s2), (0,s2)])
+
+Noop
 -}
 
 {- 2.4
@@ -97,7 +99,7 @@ Idea for algorithm: http://debian.fmi.uni-sofia.bg/~sergei/cgsr/docs/clockwise.h
 -}
 
 convex :: Shape -> Bool
--- Checks: noncoincident vertices and that all crossproducts of 3 neighbouring vertices are positive
+-- Checks: noncoincident vertices and check that all the crossproducts of 3 neighbouring vertices are positive
 convex (Polygon vs@(v1:v2:vs'))   = nonCoincident vs && all (> 0) (crossProducts (vs ++ [v1, v2]))    -- makes use of filter function
 convex (Rectangle a b)            = True
 convex (RtTriangle a b)           = True
@@ -111,7 +113,7 @@ nonCoincident vs
           rest = tail vs
       in all (\(x,y) -> x /= fst top && y /= snd top) rest && nonCoincident rest
 
--- Checks that all angles are moving counterclockwise (positive crossproduct between all adjacent edges)
+-- The crossproduct between all adjacent edges
 crossProducts :: [Vertex] -> [Float]
 crossProducts (_:_:[]) = []
 crossProducts ((x1, y1):(x2, y2):(x3, y3):vs)
@@ -122,7 +124,6 @@ crossProducts ((x1, y1):(x2, y2):(x3, y3):vs)
 Write a Haskell function to compute polygonal areas with help of the trapesoid interpretation.
 
 Idea for algorithm: http://www.geocomputation.org/1999/076/gc_076.htm
-still figuring it out...
 -}
 
 -- calculates all trapesoids in the polygon measured against the x-axis
