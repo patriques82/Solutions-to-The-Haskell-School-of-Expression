@@ -61,7 +61,7 @@ append [] vs      = vs
 append (v:vs) vs' = v : append vs vs'
 
 colors :: [Color]
-colors = [Blue, Green, Cyan, Red, Magenta, Yellow, White] -- all except Black
+colors = [Blue, Green, Cyan, Red, Magenta, Yellow, White]          -- all except Black
 
 minSize :: Double
 minSize = 8.0
