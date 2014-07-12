@@ -1,7 +1,3 @@
-module Ch1 where
-
-simple a b c = a * (b + c)
-
 {- 1.1
 Write out all the steps in the calculation of the value of
 simple (simple 2 3 4) 5 6
@@ -44,26 +40,3 @@ simple 'a' 'b' 'c' :: error
 (simple 1 2 3, simple)
 (simple 1 2 3, simple) :: Num t => (t, (t -> t -> t -> t))
 -}
-
-circleArea :: Float -> Float
-circleArea r = pi * (r ** 2) -- power of 2
-
-totalArea :: Float -> Float -> Float -> Float
-totalArea r1 r2 r3 = circleArea r1 + circleArea r2 + circleArea r3
-
-listSum :: [Float] -> Float
-listSum []     = 0
-listSum (x:xs) = x + listSum xs
-
-totalArea' :: Float -> Float -> Float -> Float
-totalArea' r1 r2 r3 = listSum [circleArea r1, circleArea r2, circleArea r3]
-
-
-
-
-
-
-
-
-
-
