@@ -1,4 +1,4 @@
-module SimpleGraphics where
+module Ch3 where
 
 import SOE
 

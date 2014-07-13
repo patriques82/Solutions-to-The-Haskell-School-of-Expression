@@ -1,4 +1,4 @@
-module Shape where
+module Ch2 where
 
 data Shape = Rectangle Side Side
            | Ellipse Radius Radius
