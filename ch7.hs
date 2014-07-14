@@ -142,12 +142,49 @@ list2Tree (x:xs)
           rt   = list2Tree (drop half xs)
       in IBranch x lt rt
 
-zipWith :: (a -> b -> c) -> InternalTree a -> InternalTree b -> InternalTree c
-zipWith f (IBranch x t1 t2) (IBranch y t3 t4)
-    = IBranch (f x y) (zipWith f t1 t3) (zipWith f t2 t4)
-zipWith f _                 _  = ILeaf
+zipTreeWith :: (a -> b -> c) -> InternalTree a -> InternalTree b -> InternalTree c
+zipTreeWith f (IBranch x t1 t2) (IBranch y t3 t4)
+    = IBranch (f x y) (zipTreeWith f t1 t3) (zipTreeWith f t2 t4)
+zipTreeWith f _                 _  = ILeaf
+
+{- 7.5
+Enhance the Expr data type with variables and let expressions and
+modify evaluate accordingly.
+-}
 
 
+data Expr = C Float | Expr :+ Expr | Expr :- Expr
+          | Expr :* Expr | Expr :/ Expr
+          | V String | Let String Expr Expr -- addition
+
+type Env = [(String, Expr)]
+
+
+evaluate' :: Env -> Expr -> Float
+evaluate' env (Let s e1 e2) = evaluate' ((s, e1):env) e2
+evaluate' env (V s) = case (lookup s env) of
+                        (Just e) -> evaluate' env e
+                        Nothing -> error "Unbound variable"
+evaluate' env (C x) = x
+evaluate' env (e1 :+ e2) = evaluate' env e1 + evaluate' env e2
+evaluate' env (e1 :- e2) = evaluate' env e1 - evaluate' env e2
+evaluate' env (e1 :* e2) = evaluate' env e1 * evaluate' env e2
+evaluate' env (e1 :/ e2) = evaluate' env e1 / evaluate' env e2
+
+evaluate :: Expr -> Float
+evaluate (Let s e1 e2) = evaluate' [] (Let s e1 e2)
+evaluate (C x) = x
+evaluate (e1 :+ e2) = evaluate e1 + evaluate e2
+evaluate (e1 :- e2) = evaluate e1 - evaluate e2
+evaluate (e1 :* e2) = evaluate e1 * evaluate e2
+evaluate (e1 :/ e2) = evaluate e1 / evaluate e2
+
+
+test1 :: Expr
+test1 = (C 10 :+ (C 8 :/ C 2)) :* (C 7 :- C 4)     -- 42.0
+
+test2 :: Expr
+test2 = (Let "x" (C 5) (V "x" :+ V "x"))           -- 10.0
 
 
 
