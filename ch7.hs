@@ -159,12 +159,11 @@ data Expr = C Float | Expr :+ Expr | Expr :- Expr
 
 type Env = [(String, Expr)]
 
-
 evaluate' :: Env -> Expr -> Float
 evaluate' env (Let s e1 e2) = evaluate' ((s, e1):env) e2
 evaluate' env (V s) = case (lookup s env) of
                         (Just e) -> evaluate' env e
-                        Nothing -> error "Unbound variable"
+                        Nothing -> error "evaluate': Unbound variable"
 evaluate' env (C x) = x
 evaluate' env (e1 :+ e2) = evaluate' env e1 + evaluate' env e2
 evaluate' env (e1 :- e2) = evaluate' env e1 - evaluate' env e2
@@ -178,7 +177,6 @@ evaluate (e1 :+ e2) = evaluate e1 + evaluate e2
 evaluate (e1 :- e2) = evaluate e1 - evaluate e2
 evaluate (e1 :* e2) = evaluate e1 * evaluate e2
 evaluate (e1 :/ e2) = evaluate e1 / evaluate e2
-
 
 test1 :: Expr
 test1 = (C 10 :+ (C 8 :/ C 2)) :* (C 7 :- C 4)     -- 42.0
