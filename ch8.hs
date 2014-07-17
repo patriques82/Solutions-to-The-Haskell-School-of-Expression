@@ -357,32 +357,7 @@ Define a function to check if a Polygons vertices describe a convex Polygon.
 Then rewrite area.
 -}
 
--- From exercise 2.4
--- Checks: noncoincident vertices and check that all the crossproducts of 3 neighbouring vertices are positive
-convex :: Shape -> Bool
-convex (Polygon (v1:v2:vs))   = checkVertices (v1:v2:vs)
-    where first = [v1,v2]
-          checkVertices :: [Vertex] -> Bool
-          checkVertices (v:[]) = nonCoincident (v:first) && positiveCrossProducts (v:first) -- first elems to wraparound
-          checkVertices vs'    = nonCoincident vs' && positiveCrossProducts vs'
-convex (Rectangle a b)         = True
-convex (RtTriangle a b)        = True
-convex (Ellipse r1 r2)         = True
-
--- Checks that non of the vertices does coincide
-nonCoincident :: [Vertex] -> Bool
-nonCoincident [] = True
-nonCoincident (v:vs) = unique v vs && nonCoincident vs
-    where unique :: Vertex -> [Vertex] -> Bool
-          unique (x1,y1) ((x2,y2):vs')
-            = not (x1 == x2 && y1 == y2) && unique (x1,y1) vs' -- not (!)
-
--- The crossproduct between all adjacent edges
-positiveCrossProducts :: [Vertex] -> Bool
-positiveCrossProducts (_:_:[]) = True
-positiveCrossProducts ((x1, y1):(x2, y2):(x3, y3):vs)
-    = let cp = (x2 - x1) * (y3 - y2) - (y2 - y1) * (x3 - x2) -- crossproduct
-      in (cp > 0.0) && positiveCrossProducts ((x2, y2):(x3, y3):vs)
+-- From exercise 2.4 (convex)
 
 area'' :: Shape -> Float
 area'' (Rectangle s1 s2) = abs (s1 * s2)
@@ -393,6 +368,7 @@ area'' (Polygon vs) = if convex (Polygon vs)
                         else error "area'': Polygon not convex"
 
 
+{- 8.12 and 8.13 are skipped -}
 
 
 
