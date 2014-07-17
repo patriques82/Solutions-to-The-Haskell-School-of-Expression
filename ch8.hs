@@ -328,7 +328,7 @@ Which can be disproved by a counter example:
 let s1 = 1
 in (-(s1/2) <= x && x <= (s1/2)) == (-((-s1)/2) <= x && x <= ((-s1)/2))
 => (-0.5 <= x && x <= 0.5) == (0.5 <= x && x <= -0.5)
-=> True (iff False == False)
+=> False (regardless of x)
 
 
 
