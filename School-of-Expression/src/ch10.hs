@@ -41,40 +41,50 @@ dragAndDrop s p
        loop' w False (0,0) (pictToList p)
 
 loop' :: Window -> Bool -> Point -> [(Color, Region)] -> IO ()
-loop' w dragging old (r:regs)
+loop' w drag old (r:regs)
   = do clearWindow w
-       sequence_                                                        -- draw current pictures
-         (map (uncurry (drawRegionInWindow w))
-            (reverse (r:regs)))
-       e <- getWindowEvent w                                            -- see whats going on
+       sequence_ $                                                    -- draw current pictures
+         map (uncurry $ drawRegionInWindow w) (reverse (r:regs))
+       e <- getWindowEvent w                                          -- see whats going on
        case e of
-         Button pt l down -> start dragging pt
-         MouseMove pt     -> moveIf dragging pt
-    where start d new
-            | d          = loop' w False new (r:regs)                   -- stop dragging
-            | otherwise  = loop' w True new (bringToFront new (r:regs)) -- start dragging
-          moveIf d new
-            | d          = loop' w d new ((moveFrom old new r):regs)    -- move from old to new pos
-            | otherwise  = loop' w d new (r:regs)                       -- just moving
+         Button new _ _  ->
+           if drag
+             then loop' w False new ((changeColor r):regs)            -- user dropped region
+             else let regs' = bringToFront new ((changeColor r):regs) -- user started to drag region
+                  in loop' w True new regs'
+         MouseMove new   ->
+           if drag
+             then let r' = moveFrom old new r                         -- user is dragging region
+                  in loop' w drag new (r':regs)
+             else loop' w drag new (r:regs)                           -- just normal mouse moves
 
+-- Brings the clicked region to front of stack
 bringToFront :: Point -> [(Color, Region)] -> [(Color, Region)]
 bringToFront (x, y) regs
-  = let aux (_,r) = r `containsR` (pixelToInch (x-xWin2),
-                                   pixelToInch (yWin2-y))
+  = let aux (_, r) = r `containsR` (pixelToInch (x - xWin2),         -- change color to Red aswell
+                                    pixelToInch (yWin2 - y))
     in case (break aux regs) of
       (xs,[])       -> xs
       (top,hit:bot) -> hit : (top ++ bot)
 
+-- Calculates the distance the user has dragged from previous loop and
+-- translates the new distance on the region. (Currently handles only
+-- Translate regions)
 moveFrom :: Point -> Point -> (Color, Region) -> (Color, Region)
 moveFrom (x1, y1) (x2, y2) (c, r)
   = let dx = pixelToInch $ x2 - x1
         dy = pixelToInch $ y1 - y2
     in case r of
-      Translate (x, y) s -> (c,  Translate ((x + dx), (y + dy)) s)
+      Translate (x, y) s -> (c,  Translate ((x + dx), (y + dy)) s)   -- Translate vector shape
 
-main = dragAndDrop "Draggable circles" circles
+changeColor :: (Color, Region) -> (Color, Region)
+changeColor (Red, r) = (Yellow, r)
+changeColor (Yellow, r) = (Red, r)
+                                                                     -- (needs more Regions)
 
-circles = foldr Over EmptyPic cs'
+main = dragAndDrop "Draggable circles" crossingCircles
+
+crossingCircles = foldr Over EmptyPic cs'
     where cs = [Translate (x, 0) (Shape (circle 1.5)) | x <- [-1,0,1]]  -- Regions
           cs' = map (Region Yellow) cs                                  -- Pictures
 
