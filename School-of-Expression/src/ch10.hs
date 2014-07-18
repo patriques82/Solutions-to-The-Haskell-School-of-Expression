@@ -54,24 +54,24 @@ loop' w drag old (r:regs)
                   in loop' w True new regs'
          MouseMove new   ->
            if drag
-             then let r' = moveFrom old new r                         -- user is dragging region
+             then let r' = moveFromTo old new r                       -- user is dragging region
                   in loop' w drag new (r':regs)
              else loop' w drag new (r:regs)                           -- just normal mouse moves
 
 -- Brings the clicked region to front of stack
 bringToFront :: Point -> [(Color, Region)] -> [(Color, Region)]
 bringToFront (x, y) regs
-  = let aux (_, r) = r `containsR` (pixelToInch (x - xWin2),         -- change color to Red aswell
+  = let aux (_, r) = r `containsR` (pixelToInch (x - xWin2),
                                     pixelToInch (yWin2 - y))
     in case (break aux regs) of
-      (xs,[])       -> xs
-      (top,hit:bot) -> hit : (top ++ bot)
+      (xs,[])          -> xs
+      (top, (hit:bot)) -> hit : (top ++ bot)
 
 -- Calculates the distance the user has dragged from previous loop and
 -- translates the new distance on the region. (Currently handles only
 -- Translate regions)
-moveFrom :: Point -> Point -> (Color, Region) -> (Color, Region)
-moveFrom (x1, y1) (x2, y2) (c, r)
+moveFromTo :: Point -> Point -> (Color, Region) -> (Color, Region)
+moveFromTo (x1, y1) (x2, y2) (c, r)
   = let dx = pixelToInch $ x2 - x1
         dy = pixelToInch $ y1 - y2
     in case r of
@@ -80,7 +80,6 @@ moveFrom (x1, y1) (x2, y2) (c, r)
 changeColor :: (Color, Region) -> (Color, Region)
 changeColor (Red, r) = (Yellow, r)
 changeColor (Yellow, r) = (Red, r)
-                                                                     -- (needs more Regions)
 
 main = dragAndDrop "Draggable circles" crossingCircles
 
