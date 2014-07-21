@@ -38,25 +38,25 @@ dragAndDrop :: String -> Picture -> IO ()
 dragAndDrop s p
   = runGraphics $
     do w <- openWindow s (xWin, yWin)
-       loop' w False (0,0) (pictToList p)
+       loop' w One False (0,0) (pictToList p)
 
 loop' :: Window -> Bool -> Point -> [(Color, Region)] -> IO ()
 loop' w drag old (r:regs)
-  = do clearWindow w
-       sequence_ $                                                    -- draw current pictures
-         map (uncurry $ drawRegionInWindow w) (reverse (r:regs))
-       e <- getWindowEvent w                                          -- see whats going on
-       case e of
-         Button new _ _  ->
-           if drag
-             then loop' w False new ((changeColor r):regs)            -- user dropped region
-             else let regs' = bringToFront new ((changeColor r):regs) -- user started to drag region
-                  in loop' w True new regs'
-         MouseMove new   ->
-           if drag
-             then let r' = moveFromTo old new r                       -- user is dragging region
-                  in loop' w drag new (r':regs)
-             else loop' w drag new (r:regs)                           -- just normal mouse moves
+	= do clearWindow w
+			 sequence_ $                                                    -- draw current pictures
+				 map (uncurry $ drawRegionInWindow w) (reverse (r:regs))
+			 e <- getWindowEvent w                                          -- see whats going on
+			 case e of
+				 Button new _ _  ->
+					 if drag
+						 then loop' w False new (r:regs)                          -- user dropped region
+						 else let regs' = bringToFront new (r:regs)               -- user started to drag region
+									in loop' w True new regs'
+				 MouseMove new   ->
+					 if drag
+						 then let r' = moveFromTo old new r                       -- user is dragging region
+									in loop' w drag new (r':regs)
+						 else loop' w drag new (r:regs)                           -- just normal mouse moves
 
 -- Brings the clicked region to front of stack
 bringToFront :: Point -> [(Color, Region)] -> [(Color, Region)]
@@ -76,10 +76,6 @@ moveFromTo (x1, y1) (x2, y2) (c, r)
         dy = pixelToInch $ y1 - y2
     in case r of
       Translate (x, y) s -> (c,  Translate ((x + dx), (y + dy)) s)   -- Translate vector shape
-
-changeColor :: (Color, Region) -> (Color, Region)
-changeColor (Red, r) = (Yellow, r)
-changeColor (Yellow, r) = (Red, r)
 
 main = dragAndDrop "Draggable circles" crossingCircles
 
