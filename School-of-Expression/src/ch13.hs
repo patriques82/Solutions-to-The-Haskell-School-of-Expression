@@ -73,15 +73,15 @@ Build a clock
 -}
 
 arm :: Float -> Behavior Region
-arm tspec = Beh (\t -> Shape $
-										Polygon [(0,0),
-														 (deltaX, deltaY),
-														 (0.05 + deltaX, deltaY),
-														 (0,-0.05)])
-	where deltaX = 2.5 * sin (t / tspec)
-				deltaY = 2.5 * cos (t / tspec)
+arm tspec
+	= let deltaX t = 1.8 * sin (t / tspec)
+	      deltaY t = 1.8 * cos (t / tspec)
+	  in Beh (\t -> Shape $ Polygon [(0,0),
+	                                 (deltaX t, deltaY t),
+	                                 (0.05 + deltaX t, deltaY t),
+	                                 (0,-0.05)])
 
-sec = (2*pi)
+sec = 2 * pi
 
 second :: Behavior Picture
 second = reg (lift0 Black) $ arm sec
@@ -93,7 +93,7 @@ hour :: Behavior Picture
 hour = reg (lift0 Black) $ arm (60*60*sec)
 
 background :: Behavior Picture
-background = reg (lift0 White) $ shape $ ell 2 2
+background = reg (lift0 White) $ shape $ ell 1.9 1.9
 
 clock :: IO ()
 clock = animateB "Clock" $ overMany [second, minute, hour, background]
