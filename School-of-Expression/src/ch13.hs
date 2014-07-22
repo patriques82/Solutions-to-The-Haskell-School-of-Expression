@@ -31,6 +31,17 @@ Make the planets more realistic:
 
 -- Result of implementing spec 1,2,3 (not 4):
 
+sun :: Behavior Picture
+sun = reg yellow $ shape $ ell 0.7 0.7
+
+earth :: Behavior Picture
+earth = reg (lift0 Blue) $ translate earthsOrbit $
+														shape $ ell 0.25 0.25
+
+moon :: Behavior Picture
+moon = reg (lift0 White) $ translate moonsOrbit $
+												 		shape $ ell 0.1 0.1
+
 earthsOrbit :: (Behavior Time, Behavior Time)
 earthsOrbit = ((14*pi/16) * sin time,
 							 (3*pi/16) * cos time)
@@ -40,17 +51,6 @@ moonsOrbit
 	= let (x, y) = earthsOrbit
 		in (x + (4*pi/16) * cos (5 * time),
 				y - (pi/16) * sin (5 * time))
-
-moon :: Behavior Picture
-moon = reg (lift0 White) $ translate moonsOrbit $
-												 		shape $ ell 0.1 0.1
-
-earth :: Behavior Picture
-earth = reg (lift0 Blue) $ translate earthsOrbit $
-														shape $ ell 0.25 0.25
-
-sun :: Behavior Picture
-sun = reg yellow $ shape $ ell 0.7 0.7
 
 (<*) :: Ord a => Behavior a -> Behavior a -> Behavior Bool
 (<*) = lift2 (<)
@@ -66,13 +66,38 @@ planetOrder = cond (cos time <* 0)       -- if earths y-pos is under suns
 planets' :: IO ()
 planets' = animateB "Orbits" planetOrder
 
-
 {- 13.3
 Build a clock
+
+(This is a rather ugly but functional solution ;-) )
 -}
 
+arm :: Float -> Behavior Region
+arm tspec = Beh (\t -> Shape $
+										Polygon [(0,0),
+														 (deltaX, deltaY),
+														 (0.05 + deltaX, deltaY),
+														 (0,-0.05)])
+	where deltaX = 2.5 * sin (t / tspec)
+				deltaY = 2.5 * cos (t / tspec)
+
+sec = (2*pi)
+
+second :: Behavior Picture
+second = reg (lift0 Black) $ arm sec
+
+minute :: Behavior Picture
+minute = reg (lift0 Black) $ arm (60*sec)
+
+hour :: Behavior Picture
+hour = reg (lift0 Black) $ arm (60*60*sec)
+
+background :: Behavior Picture
+background = reg (lift0 White) $ shape $ ell 2 2
+
 clock :: IO ()
-clock = animateB "Clock" undefined
+clock = animateB "Clock" $ overMany [second, minute, hour, background]
+
 
 
 
