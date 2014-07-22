@@ -35,22 +35,18 @@ sun :: Behavior Picture
 sun = reg yellow $ shape $ ell 0.7 0.7
 
 earth :: Behavior Picture
-earth = reg (lift0 Blue) $ translate earthsOrbit $
-														shape $ ell 0.25 0.25
+earth = reg (lift0 Blue) $ translate earthsOrbit $ shape $ ell 0.25 0.25
 
 moon :: Behavior Picture
-moon = reg (lift0 White) $ translate moonsOrbit $
-												 		shape $ ell 0.1 0.1
+moon = reg (lift0 White) $ translate moonsOrbit $ shape $ ell 0.1 0.1
 
 earthsOrbit :: (Behavior Time, Behavior Time)
-earthsOrbit = ((14*pi/16) * sin time,
-							 (3*pi/16) * cos time)
+earthsOrbit = ((14*pi/16) * sin time, (3*pi/16) * cos time)
 
 moonsOrbit :: (Behavior Time, Behavior Time)
 moonsOrbit
 	= let (x, y) = earthsOrbit
-		in (x + (4*pi/16) * cos (5 * time),
-				y - (pi/16) * sin (5 * time))
+		in (x + (4*pi/16) * cos (5 * time), y - (pi/16) * sin (5 * time))
 
 (<*) :: Ord a => Behavior a -> Behavior a -> Behavior Bool
 (<*) = lift2 (<)
