@@ -47,10 +47,9 @@ earthsOrbit = ((14*pi/16) * sin time,
 							 (3*pi/16) * cos time)
 
 moonsOrbit :: (Behavior Time, Behavior Time)
-moonsOrbit
-	= let (x, y) = earthsOrbit
-		in (x + (4*pi/16) * cos (5 * time),
-				y - (pi/16) * sin (5 * time))
+moonsOrbit = let (x, y) = earthsOrbit
+						 in (x + (4*pi/16) * cos (5 * time),
+								 y - (pi/16) * sin (5 * time))
 
 (<*) :: Ord a => Behavior a -> Behavior a -> Behavior Bool
 (<*) = lift2 (<)
