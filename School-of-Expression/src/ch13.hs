@@ -68,29 +68,31 @@ planets' = animateB "Orbits" planetOrder
 
 {- 13.3
 Build a clock
-
-(This is a rather ugly but functional solution ;-) )
 -}
 
-arm :: Float -> Behavior Region
-arm tspec
-	= let deltaX t = 1.8 * sin (t / tspec)
-	      deltaY t = 1.8 * cos (t / tspec)
-	  in Beh (\t -> Shape $ Polygon [(0,0),
-	                                 (deltaX t, deltaY t),
-	                                 (0.05 + deltaX t, deltaY t),
-	                                 (0,-0.05)])
+arm :: Float -> Float -> Behavior Region
+arm len tspec
+	= let inner_x t = 0.05 * sin (t / tspec)
+	      inner_y t = 0.05 * cos (t / tspec)
+	      outer_X t = len * sin (t / tspec)
+	      outer_Y t = len * cos (t / tspec)
+	      delta_x t = 0.025 * cos (t * 0.01)
+	      delta_y t = 0.025 * sin (t * 0.01)
+	  in Beh (\t -> Shape $ Polygon [(inner_x t + delta_x t, inner_y t + delta_y t),
+	                                 (outer_X t + delta_x t, outer_Y t + delta_y t),
+	                                 (outer_X t - delta_x t, outer_Y t - delta_y t),
+	                                 (inner_x t - delta_x t, inner_y t - delta_y t)])
 
 sec = 2 * pi
 
 second :: Behavior Picture
-second = reg (lift0 Black) $ arm sec
+second = reg (lift0 Black) $ arm 1.8 sec
 
 minute :: Behavior Picture
-minute = reg (lift0 Black) $ arm (60*sec)
+minute = reg (lift0 Black) $ arm 1.8 (60*sec)
 
 hour :: Behavior Picture
-hour = reg (lift0 Black) $ arm (60*60*sec)
+hour = reg (lift0 Black) $ arm 1.4 (60*60*sec)
 
 background :: Behavior Picture
 background = reg (lift0 White) $ shape $ ell 1.9 1.9
@@ -99,9 +101,11 @@ clock :: IO ()
 clock = animateB "Clock" $ overMany [second, minute, hour, background]
 
 
+{- 13.4 Skipped -}
 
+{- 13.5 Skipped -}
 
-
+{- 13.6 Skipped -}
 
 
 
