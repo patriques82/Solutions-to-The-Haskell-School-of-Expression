@@ -79,7 +79,7 @@ arm len tspec
 	                                 (outer_X t - delta_x t, outer_Y t - delta_y t),
 	                                 (inner_x t - delta_x t, inner_y t - delta_y t)])
 
-sec = 2 * pi
+sec = 4 * pi
 
 second :: Behavior Picture
 second = reg (lift0 Black) $ arm 1.8 sec
