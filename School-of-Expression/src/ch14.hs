@@ -32,20 +32,24 @@ primes' (p:xs) = p : filter (not . divisibleBy p) xs
 
 -- wires the numerators to the mappings function so that it can map the
 -- head of the numerators to the primes
-numerators :: [Integer] -> [Integer] -> [Integer]
-numerators ps ns = mappings ps ns
+numerators :: [Integer] -> [Integer]
+numerators ns = mappings ns
 
 -- maps the head of the numerators to the primes and passes the mapped
 -- values back with a appended recursive call to numerators function with
 -- the mapped values so that they also get mapped later.
-mappings :: [Integer] -> [Integer] -> [Integer]
-mappings ps (n:ns) = ms ++ numerators ps ms
+mappings :: [Integer] -> [Integer]
+mappings (n:ns) = ms ++ numerators ms
 	where ms = map (n*) ps
 
 -- outputs the mappings of the primes in a stream
-stream :: [Integer] -> [Integer]
-stream ps = 1 : numerators ps (output ps)
+stream :: [Integer]
+stream = 1 : numerators stream
 
-test = stream (take 5 primes)
+-- set amount of primes to use
+ps = take 5 primes
+
+
+
 
 
