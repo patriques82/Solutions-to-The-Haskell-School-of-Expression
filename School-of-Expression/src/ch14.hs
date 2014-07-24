@@ -156,6 +156,57 @@ this leads to pascals triangle!
 
 -}
 
+{- 14.5
+Show that cycke is the identity function on infinite lists, i.e
+
+cycle lst == lst
+
+cycle lst
+=> bottom
+=> lst
+
+-}
+
+{- 14.6 -}
+type Poly = [Float]
+
+pn1 :: Poly
+pn1 = 2:(-3):1:repeat 0 							-- 1 + 2x^2 - 4x^3 + 3x^5
+
+scale :: Float -> Poly -> Poly
+scale a = map (*a)
+
+-- 1.
+addPoly :: Poly -> Poly -> Poly
+addPoly = zipWith (+)
+
+-- 2.
+subPoly :: Poly -> Poly -> Poly
+subPoly = zipWith (-)
+
+-- 3.
+mulPoly :: Poly -> Poly -> Poly
+mulPoly (x:xn) (y:yn) = (x*y) : addPoly (map (*x) yn) (mulPoly xn (y:yn))
+
+-- 4.
+divPoly :: Poly -> Poly -> Poly
+divPoly (x:xn) (y:yn) = (x/y) : divPoly (subPoly xn (map (*(x/y)) yn)) (y:yn)
+
+{- 14.7 Skipped -}
+
+{- 14.8
+Create instances of existing type classes to use names such as (+) and (*).
+-}
+
+newtype Pol = Pol [Float]
+
+instance Num Pol where
+	(+) (Pol xs) (Pol ys) = Pol $ addPoly xs ys
+	(*) (Pol xs) (Pol ys) = Pol $ mulPoly xs ys
+	abs (Pol xs)          = Pol $ map abs xs
+	signum (Pol xs)       = Pol $ map signum xs
+	fromInteger x         = Pol [fromInteger x]
+
 
 
 
