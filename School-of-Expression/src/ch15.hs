@@ -45,26 +45,52 @@ This one was really hard, only got a spaceship shooting ready.
 -}
 
 spaceinvaders :: Behavior Picture
-spaceinvaders = screen `over` spaceship `over` rocket -- `over` enemies
+spaceinvaders = screen `over` spaceship `over` rockets -- `over` enemies
 
 screen = walls
 
 spaceship :: Behavior Picture
-spaceship
-	= let
-			vs = [(-0.1,-0.1), (0,0.1), (0.1,-0.1)]
-			x  = fst mouse
-		in paint red (translate (x, -1.7) (tri vs))
+spaceship =
+	let
+		vs = [(-0.1,-0.1), (0,0.1), (0.1,-0.1)]
+		x  = fst mouse
+	in paint red (translate (x, -1.7) (tri vs))
 
 tri :: [Vertex] -> Behavior Region
 tri vs = shape (lift0 (Polygon vs))
 
-rocket :: Behavior Picture
-rocket = paint white (translate (x,y) (rec 0.03 0.04))
+ship_x :: Behavior Float
+ship_x = Behavior (\uts -> loop uts (fs uts))
 	where
-		x   = fst mouse `untilB` lbp `snapshot` x =>> (\(_,old) -> lift0 old)
-		y	  = (-1.6) `untilB` lbp ->> (-1.6) `stepAccum` Event (\(_,ts) -> aux ts)
-		aux = map (\_ -> Just (+0.05))
+		Behavior fs = spaceship
+		loop ((_:us),(_:ts)) ((Region _ (Translate (x,_) _)):bs) = x : loop (us,ts) bs
+
+append :: Event () -> Behavior Picture -> Behavior Picture
+append (Event e) ~(Behavior ps)
+	= memoB $ Behavior (\uts@(us,ts) -> loop us ts (e uts) (ps uts))
+     where loop (_:us) (_:ts) ~(e:es) ~(b:bs) =
+             b : case e of
+                   Nothing -> loop us ts es bs
+                   Just () -> loop us ts es (zipWith' Over (ps (us,ts)) bs)
+
+rockets :: Behavior Picture
+rockets = append lbp rocket
+
+rocket :: Behavior Picture
+rocket  = paint white (translate (x, y) (rec 0.03 0.04))
+	where
+		x   = ship_x `untilB` lbp `snapshot_` x =>> constB
+		y	= (-1.6) `untilB` lbp ->> (-1.6) `stepAccum` Event (\(_,ts) -> aux ts)
+		aux = map (\_ -> Just (+0.04))
+
+{- lbp_p :: Event SOE.Point-}
+{- lbp_p = Event (\(uas,_) -> map getlbp uas)-}
+{-     where-}
+{-         getlbp (Just (SOE.Button p True True)) = Just p-}
+{-         getlbp _                               = Nothing-}
+
+{- int2Float :: Int -> Float-}
+{- int2Float = fromInteger . toInteger-}
 
 enemies :: Behavior Picture
 enemies = undefined
