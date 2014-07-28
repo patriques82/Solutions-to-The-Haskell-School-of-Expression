@@ -68,7 +68,11 @@ fmap (f . g) (Branch t1 t2)
 {- 17.2
 Verify the associativity law for (>>), starting with the associativity law for (>>=).
 
-
+m1 >> (m2 >> m3)
+=> m1 >>= ((\_ -> m2) >>= (\_ -> m3))   -- definition of (>>)
+=> ((m1 >>= (\_ -> m2)) >>= (\_ -> m3)  -- associativity law for (>>=)
+=> (m1 >> m2) >>= (\_ -> m3)
+=> (m1 >> m1) >> m3
 
 -}
 
