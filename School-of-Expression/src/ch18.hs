@@ -210,3 +210,122 @@ Id a >>= (\x -> k x >>= h)
 
 -}
 
+{- 18.6
+Verify that the instances of MonadPlus for the Maybe and list data type are
+law-abinding.
+
+instance MonadPlus Maybe where
+	mzero              = Nothing
+	Nothing `mplus` ys = ys
+	xs `mplus` ys      = xs
+
+1.
+Nothing >>= (\x' -> mzero)
+=> Nothing
+=> mzero
+
+Just x >>= (\x' -> mzero)
+=> (\x' -> mzero) $ x
+=> mzero
+
+2.
+mzero >>= m
+=> Nothing >>= m
+=> Nothing
+=> mzero
+
+3.
+Nothing `mplus` mzero
+=> mzero
+=> Nothing
+
+Just x `mplus` mzero
+=> Just x
+
+4.
+mzero `mplus` Nothing
+=> Nothing `mplus` Nothing
+=> Nothing
+
+mzero `mplus` Just x
+=> Nothing `mplus` Just x
+=> Just x
+
+
+instance MonadPlus [] where
+	mzero = []
+	mplus = (++)
+
+1.
+[] >>= (\x' -> mzero)
+=> []
+=> mzero
+
+(x:xs) >>= (\x' -> mzero)
+=> concat (map (\x' -> mzero) (x:xs))
+=> concat ([] : map (\x' -> mzero) xs)
+=> []
+=> mzero
+
+2.
+mzero >>= m
+=> [] >>= m
+=> concat (map m [])
+=> []
+=> mzero
+
+3.
+[] `mplus` mzero
+=> [] ++ mzero
+=> [] ++ []
+=> []
+
+xs `mplus` mzero
+=> xs ++ mzero
+=> xs ++ []
+=> xs
+
+4.
+mzero `mplus` []
+=> [] ++ []
+=> []
+
+mzero `mplus` xs
+=> [] ++ xs
+=> xs
+
+-}
+
+
+data Tree a = Leaf a | Branch (Tree a) (Tree a)
+	deriving Show
+
+newtype Label a = Label (Int -> (Int, a))
+
+instance Monad Label where
+	return x
+		= Label (\s -> (s, x))
+	Label ts1 >>= fsm1
+		= Label (\s0 ->
+				let
+					(s1, v1)  = ts1 s0
+					Label ts2 = fsm1 v1
+				in ts2 s1)
+
+mlabel :: Tree a -> Tree Int
+mlabel t = let Label lb = mlab t
+					 in snd (lb 0)
+
+mlab :: Tree a -> Label (Tree Int)
+mlab (Leaf x)
+	= Label (\n -> (n+1, Leaf n))
+mlab (Branch t1 t2)
+	= do lb1 <- mlab t1
+	     lb2 <- mlab t2
+	     return (Branch lb1 lb2)
+
+mtest = let t = Branch (Leaf 'a') (Leaf 'b')
+        in mlabel (Branch t t)
+
+
+
