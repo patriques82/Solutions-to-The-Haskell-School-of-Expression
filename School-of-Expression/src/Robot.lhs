@@ -9,9 +9,9 @@ uses the following convention:
 
 > module Robot where
 >
-> import Array
-> import List
-> import Monad
+> import Data.Array
+> import Data.List
+> import Control.Monad
 > import SOE
 
 > -- import qualified GraphicsWindows as GW (getEvent)
@@ -295,7 +295,7 @@ uses the following convention:
 
 > wc, cc :: Color
 > wc = Green  -- color of walls
-> cc = Yellow -- color of coins
+> cc = Red -- color of coins
 
 > xWin, yWin :: Int
 > xWin = 600
@@ -363,8 +363,8 @@ uses the following convention:
 >               (Just (xWin,yWin)) drawBufferedGraphic
 >        drawGrid w g
 >        drawCoins w s
->        spaceWait w
->        sf s g w
+>        --spaceWait w
+>        -- sf s g w
 >        spaceClose w
 
 > s0 :: RobotState

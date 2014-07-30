@@ -176,7 +176,7 @@ return x >>= k
 => concat (concat (map (\x' -> k x') (x:xs)) >>= h)
 => concat (concat ([x'] : map (\x' -> k x') xs) >>= h)
 => concat ((x':xs') >>= h)
-=> ((x:xs) >>= k) >>= h)
+=> ((x:xs) >>= k) >>= h
 
 -}
 
